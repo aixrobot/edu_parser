@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.StringTokenizer;
 
 public class DicReader {
 
@@ -42,9 +43,30 @@ public class DicReader {
 		BufferedReader br = new BufferedReader(new InputStreamReader(fis));
 	 
 		String line = null;
+		int i = 0;
+		boolean chk = false;
 		while ((line = br.readLine()) != null) {
-			line = line.replace(":", ",");
-			System.out.println(line);
+			//line = line.replace(":", ",");
+			//System.out.println(line);
+			StringTokenizer st1 = new StringTokenizer(line, ":");
+			i=0;
+			chk = false;
+			String bd = "";
+			while (st1.hasMoreTokens()) {
+				String tok = st1.nextToken();
+				if(i==0){
+					tok = tok.trim();
+					System.out.print("INSERT INTO (word, definition) VALUES('"+tok+"',");
+				}else if(i==2){
+					bd+=" : "+tok;
+				}else{
+					tok = tok.trim();
+					bd+=tok;
+				}
+				i++;
+			}
+			System.out.print("'" + bd +"');");
+			System.out.println("");
 		}
 	 
 		br.close();
