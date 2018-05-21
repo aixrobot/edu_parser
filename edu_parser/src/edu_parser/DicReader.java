@@ -13,7 +13,7 @@ public class DicReader {
 			
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		// git version
+		// git version 1.0
 
 		/*
 		 * startwith('a')
