@@ -9,11 +9,12 @@ import java.util.StringTokenizer;
 
 public class DicReader {
 
-	static String filePath = "D://edua_data/engdic/a.dic";
+	static String filePath = "D://edua_data/engdic/a.dics";
 			
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		
+
+
 		/*
 		 * startwith('a')
 		 * regex
