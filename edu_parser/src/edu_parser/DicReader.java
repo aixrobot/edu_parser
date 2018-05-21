@@ -9,7 +9,7 @@ import java.util.StringTokenizer;
 
 public class DicReader {
 
-	static String filePath = "/Users/juseong-yun/IdeaProjects/edu_parser/edu_parser/a.dic";
+	static String filePath = "/Users/juseong-yun/IdeaProjects/git/edu_parser/b.dic";
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

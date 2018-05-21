@@ -5,7 +5,7 @@ import java.util.StringTokenizer;
 
 public class DicReader2 {
 
-    static String filePath = "/Users/juseong-yun/IdeaProjects/edu_parser/edu_parser/dic_a";
+    static String filePath = "/Users/juseong-yun/IdeaProjects/git/edu_parser/a_dic";
 
     public static void main(String[] args) {
         // TODO Auto-generated method stub
@@ -176,7 +176,7 @@ public class DicReader2 {
     private static void WriteFile(String strBuffer) throws IOException {
 
         //file output
-        String fileName = "/Users/juseong-yun/IdeaProjects/edu_parser/edu_parser/dic_a_db.txt" ;
+        String fileName = "/Users/juseong-yun/IdeaProjects/git/edu_parser/dic_a_db.txt" ;
 
         try{
 
