@@ -95,30 +95,31 @@ public class DicReader {
 			definition = "";
 
 			String[] splitedAry = line.split("\\:");
-			System.out.println(splitedAry[0]);
+			//System.out.println(splitedAry[0]);
 
 			word = splitedAry[0].trim();
+			System.out.println(word);
 			String rightValue = "";
 			for(int i=1; i<splitedAry.length; i++){
 				rightValue += splitedAry[i];
 			}
 			rightValue = rightValue.trim();
-			System.out.println(rightValue);
+			//System.out.println(rightValue);
 
 
 			for(int j=0; j<wordTypeList.length; j++) {
 				if (rightValue.contains(wordTypeList[j])) {
-					System.out.println("###FINDED : " +wordTypeList[j]+ "#####");
+					//System.out.println("###FINDED : " +wordTypeList[j]+ "#####");
 					//replace
 					rightValue = rightValue.replaceAll(wordTypeList[j], wordTypeListKor[j]);
-					System.out.println(rightValue);
+					//System.out.println(rightValue);
 				}
 			}
 
 			String [] splitedRV = rightValue.split("\\,");
 
 			for(int k=0; k<splitedRV.length; k++){
-				System.out.println(""+splitedRV[k].trim());
+				//System.out.println(""+splitedRV[k].trim());
 			}
 
 		}
