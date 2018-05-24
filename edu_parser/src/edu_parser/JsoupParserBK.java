@@ -17,7 +17,7 @@ public class JsoupParserBK {
 
         //FindDefinition();
         try {
-            JsoupParse("native");
+            JsoupParse("broad");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -46,8 +46,9 @@ public class JsoupParserBK {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
         }
+
+
 
     }
 
@@ -107,25 +108,40 @@ public class JsoupParserBK {
 
 
     public static void JsoupParse(String word) throws IOException {
+
+        // Response로부터 Document 얻어오기
         Connection.Response response = Jsoup.connect("http://www.google.co.kr/search?q="+word+"%20구글번역").method(Connection.Method.GET).execute();
-        Document document = response.parse();
+        Document google3 = response.parse();
+
+        String html = google3.html();
+        String text = google3.text();
+
+        System.out.println(html);
+
+
+        Element btnK = google3.select("input[name=btnK]").first();
+        String btnKValue = btnK.attr("value");
+        //Element korDef = google3.select(div.)
+        //System.out.println(btnKValue);
+
 
 
         //main definition
-        Element selDiv = document.select("div.oSioSc pre.tw-data-text span").first();
+        Element selDiv = google3.select("div.oSioSc pre.tw-data-text span").first();
         System.out.println(selDiv.text());
 
 
         //additional definition
-        Elements addSelElems = document.select("div.tw-bilingual-dictionary");
+        Elements addSelElems = google3.select("div.tw-bilingual-dictionary");
 
-        //System.out.println("#################\n");
+        System.out.println("#################\n");
         //System.out.println(addSelElems);
 
         for(Element elem: addSelElems){
             Element selPos = elem.select("div").first();
-            System.out.println(selPos.text());
+            System.out.print(selPos.text());
         }
+
 
 
     }

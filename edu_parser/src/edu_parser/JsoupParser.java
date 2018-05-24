@@ -12,12 +12,12 @@ public class JsoupParser {
 
     public static void main(String[] args) {
         // TODO Auto-generated method stub
-        System.out.println("Jsoup First");
+        System.out.println("Starting Jsoup Parsing...");
 
 
         //FindDefinition();
         try {
-            JsoupParse("native");
+            JsoupParse("absent");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -110,6 +110,10 @@ public class JsoupParser {
         Connection.Response response = Jsoup.connect("http://www.google.co.kr/search?q="+word+"%20구글번역").method(Connection.Method.GET).execute();
         Document document = response.parse();
 
+        String html = document.html();
+        String text = document.text();
+
+
 
         //main definition
         Element selDiv = document.select("div.oSioSc pre.tw-data-text span").first();
@@ -119,14 +123,38 @@ public class JsoupParser {
         //additional definition
         Elements addSelElems = document.select("div.tw-bilingual-dictionary");
 
-        //System.out.println("#################\n");
-        //System.out.println(addSelElems);
 
         for(Element elem: addSelElems){
-            Element selPos = elem.select("div").first();
-            System.out.println(selPos.text());
-        }
+            //System.out.println(elem);
 
+            //System.out.println(elem);
+
+            Elements selPos1 = elem.select("div.tw-bilingual-pos");
+            for(Element eSelPos1: selPos1) {
+                System.out.println(eSelPos1.text() + "|");
+            }
+            //System.out.println(selPos1.text());
+
+            Elements selPos2 = elem.select("span.tw-bilingual-translation");
+            for(Element eSelPos2: selPos2) {
+                System.out.println(eSelPos2.text() + "|");
+            }
+
+            //Elements selPos3 = elem.select("div.tw-bilingual-entries div.tw-bilingual-marked");
+            Elements selPos3 = elem.select("div.tw-bilingual-entries div.tw-bilingual-entry");
+            for(Element eSelPos3: selPos3) {
+                System.out.println(eSelPos3.text() + "|");
+            }
+
+//            Elements selPos3 = elem.select("div");
+//            for(Element eSelPos3: selPos3) {
+//                System.out.println(eSelPos3.text() + "|");
+//            }
+
+
+//            Element selPos = elem.select("div").first();
+//            System.out.print(selPos.text());
+        }
 
     }
 
@@ -136,7 +164,7 @@ public class JsoupParser {
         //Document google2 = Jsoup.connect("http://www.google.com").post();
 
         // Response로부터 Document 얻어오기
-        Connection.Response response = Jsoup.connect("http://translate.google.co.kr/?hl=ko&q="+word+"#en/ko/"+"native").method(Connection.Method.GET).execute();
+        Connection.Response response = Jsoup.connect("http://translate.google.co.kr/?ie=UTF-8&hl=ko&client=tw-ob#en/ko/"+word).method(Connection.Method.POST).followRedirects(true).execute();
         Document google3 = response.parse();
 
         String html = google3.html();
