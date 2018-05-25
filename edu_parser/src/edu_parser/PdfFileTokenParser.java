@@ -28,6 +28,7 @@ public class PdfFileTokenParser {
 		FileInputStream fi = new FileInputStream(new File(pdffilePath));
 		PDFParser parser = new PDFParser(fi);
 		parser.parse();
+
 		COSDocument cd = parser.getDocument();
 		PDFTextStripper stripper = new PDFTextStripper();
 		content = stripper.getText(new PDDocument(cd));
@@ -85,7 +86,7 @@ public class PdfFileTokenParser {
 		}
 
 		System.out.println("Total Count : " + splitedTxt.length);
-		System.out.println("Total Count Grouop : " + hashWordList.size());
+		System.out.println("Total Count Group : " + hashWordList.size());
 
 
 	}
