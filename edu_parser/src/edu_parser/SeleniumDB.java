@@ -14,8 +14,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+
+
+
 public class SeleniumDB {
 
+
+    static final int MODE_DEF_NULL_UPDATE = 0;
+    static final int MODE_FLAG_UPDATE = 1;
+    static final int MODE_ALLREPLACE = 2;
+    static final int MODE_DEF_MIS_UPDATE = 4;
+
+    static final int MODE = MODE_ALLREPLACE;
 
     WebDriver driver;
     Connection c = null;
@@ -34,9 +44,14 @@ public class SeleniumDB {
         List<String> defList = new ArrayList<String>();
 
         try {
-            wordList = selenium.SelectWordList("b");
+            //selenium.ParseDefinition();
+
+
+            wordList = selenium.SelectWordList("a");
             defList = selenium.ListParse(wordList);
             selenium.UpdateDefLoopControl(wordList, defList);
+
+
 
             //selenium.FileReadAndInsertDB(filePath);
             //selenium.FileReadAndParse();
@@ -73,7 +88,7 @@ public class SeleniumDB {
         try {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:/Users/juseong-yun/IdeaProjects/git/edu_parser/java_sqlite.db");
-            c.setAutoCommit(false);
+            c.setAutoCommit(true);
             System.out.println("Opened database successfully");
         }catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
@@ -92,12 +107,33 @@ public class SeleniumDB {
         }
     }
 
+    public void ParseDefinition() throws IOException {
+        String def = "지원<def><pos>명사<kor>지원<syn>backup,<syn>desire<pos>형용사<kor>지원하는<syn>backup";
+        String [] split1 = def.split("\\<def>");
+
+        for(int i=0; i<split1.length; i++){
+            System.out.println("-"+split1[i]);
+            if(i == 1){
+                String [] split2 = split1[1].split("\\<pos>");
+                for(int j=0; j<split2.length; j++){
+                    System.out.println("--"+split2[j]);
+                    String [] split3 = split2[j].split("\\<kor>");
+                    for(int k=0; k<split3.length; k++){
+                        System.out.println("---"+split3[k]);
+                    }
+                }
+            }
+        }
+    }
+
+
+
     public void UpdateDefLoopControl(List<String> wordList, List<String> defList){
         System.out.println("Find word count : " + wordList.size());
         System.out.println("Find def count : " + defList.size());
 
         for(int i=0; i<wordList.size(); i++){
-            int resultCnt = UpdateDefinition(wordList.get(i), defList.get(i));
+            int resultCnt = UpdateDefinition(wordList.get(i), defList.get(i), MODE_ALLREPLACE);
             System.out.println("Update Complete : " + wordList.get(i) + " - Count : " + resultCnt);
         }
     }
@@ -118,7 +154,6 @@ public class SeleniumDB {
                 System.out.println(line);
                 line = line.trim();
                 InsertWord(line);
-
             }
 
         }catch(IOException e){
@@ -256,9 +291,8 @@ public class SeleniumDB {
 
             WebElement resultBox = driver.findElement(By.id("result_box"));
 
-            System.out.println("기본의미 : "+resultBox.getText());
-            definition += resultBox.getText() + newline;
-
+            System.out.println("Captured success : " + word + " - " + resultBox.getText() + "<def>");
+            definition += resultBox.getText() + "<def>";
 
 
             String src = driver.getPageSource();
@@ -273,17 +307,20 @@ public class SeleniumDB {
 
                 //System.out.println(splitedTxt[i]);
                 if(splitedTxt[i].contains("class=\"gt-cd-pos\"")){
-                    System.out.println("순서 전치사 : "+Jsoup.parse(splitedTxt[i]).text());
-                    definition += Jsoup.parse(splitedTxt[i]).text() + newline;
-                }
-                if(splitedTxt[i].contains("gt-baf-word-clickable")){
-                    System.out.println("한글 의미 : "+Jsoup.parse(splitedTxt[i]).text());
-                    definition += Jsoup.parse(splitedTxt[i]).text() + newline;
+                    System.out.println("<pos>"+Jsoup.parse(splitedTxt[i]).text());
+                    definition += "<pos>" + Jsoup.parse(splitedTxt[i]).text();
 
                 }
+
+                if(splitedTxt[i].contains("gt-baf-word-clickable")){
+                    System.out.println("<kor>"+Jsoup.parse(splitedTxt[i]).text());
+                    definition += "<kor>" + Jsoup.parse(splitedTxt[i]).text();
+
+                }
+
                 if(splitedTxt[i].contains("gt-baf-back")){
-                    System.out.println("동의어 의미 : "+Jsoup.parse(splitedTxt[i]).text());
-                    definition += Jsoup.parse(splitedTxt[i]).text() + newline;
+                    System.out.println("<syn>"+Jsoup.parse(splitedTxt[i]).text());
+                    definition += "<syn>" + Jsoup.parse(splitedTxt[i]).text();
 
                 }
             }
@@ -294,8 +331,6 @@ public class SeleniumDB {
         }
         return definition;
     }
-
-
 
 
 
@@ -324,7 +359,7 @@ public class SeleniumDB {
         try {
 
             stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery( "SELECT * FROM TBL_CRAW_KORDIC WHERE WORD LIKE '"+startChar+"%' and id between 105 and 200;" );
+            ResultSet rs = stmt.executeQuery( "SELECT * FROM TBL_CRAW_KORDIC WHERE WORD LIKE '"+startChar+"%' and id between 114744 and 114844 AND CRAW_TEXT IS NULL  "  );
             while ( rs.next() ) {
                 int id = rs.getInt("id");
                 String  word = rs.getString("word");
@@ -346,7 +381,52 @@ public class SeleniumDB {
     }
 
 
-    public int UpdateDefinition(String word, String def){
+    public int UpdateDefinition(String word, String def, int mode){
+        int updateCnt = -1;
+
+        def = def.trim();
+
+        String sql = "UPDATE TBL_CRAW_KORDIC SET CRAW_TEXT = ?, C_FLAG = C_FLAG+1 WHERE UPPER(WORD) = UPPER(?) AND CRAW_TEXT is null";
+/*
+        switch(MODE) {
+            case MODE_ALLREPLACE :
+                sql = "UPDATE TBL_CRAW_KORDIC SET CRAW_TEXT = ?, C_FLAG = C_FLAG+1 WHERE UPPER(WORD) = UPPER(?) ";
+                break;
+            case MODE_DEF_NULL_UPDATE :
+                sql = "UPDATE TBL_CRAW_KORDIC SET CRAW_TEXT = ?, C_FLAG = C_FLAG+1 WHERE UPPER(WORD) = UPPER(?) AND CRAW_TEXT is null ";
+                break;
+            case MODE_FLAG_UPDATE :
+                sql = "UPDATE TBL_CRAW_KORDIC SET CRAW_TEXT = ?, C_FLAG = C_FLAG+1 WHERE UPPER(WORD) = UPPER(?) AND TRIM(CRAW_TEXT) = '' ";
+                break;
+            case MODE_DEF_MIS_UPDATE :
+                sql = "UPDATE TBL_CRAW_KORDIC SET CRAW_TEXT = ?, C_FLAG = C_FLAG+1 WHERE UPPER(WORD) = UPPER(?) AND TRIM(CRAW_TEXT) = '' ";
+                break;
+            default:
+                break;
+        }
+*/
+
+        try {
+
+            PreparedStatement pstmt = c.prepareStatement(sql);
+            System.out.println("Define : " + def);
+            pstmt.setString(1, def);
+            pstmt.setString(2, word);
+            updateCnt = pstmt.executeUpdate();
+            //c.commit();
+            pstmt.close();
+
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        System.out.println("Operation done successfully");
+
+        return updateCnt;
+    }
+
+
+    public int UpdateWordFlag(String word){
         int updateCnt = -1;
 
         String sql = "UPDATE TBL_CRAW_KORDIC SET CRAW_TEXT = ?, C_FLAG = C_FLAG+1 WHERE UPPER(WORD) = UPPER(?) ";
@@ -354,7 +434,7 @@ public class SeleniumDB {
         try {
 
             PreparedStatement pstmt = c.prepareStatement(sql);
-            pstmt.setString(1, def);
+            //pstmt.setString(1, def);
             pstmt.setString(2, word);
             updateCnt = pstmt.executeUpdate();
             c.commit();
@@ -368,6 +448,7 @@ public class SeleniumDB {
 
         return updateCnt;
     }
+
 
 
 
